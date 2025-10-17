@@ -15,10 +15,31 @@
 
 ## 技术栈
 
+### 核心框架
+
 - **Node.js**: 运行时环境
 - **TypeScript**: 编程语言
 - **Express**: Web框架
 - **MySQL**: 数据库
+
+### 开发工具
+
+- **Jest**: 测试框架
+- **ESLint**: 代码检查
+- **Prettier**: 代码格式化
+- **Husky**: Git hooks
+- **Winston**: 日志管理
+
+### 安全工具
+
+- **Helmet**: 安全头设置
+- **express-rate-limit**: 限流保护
+- **Joi**: 数据验证
+- **bcryptjs**: 密码加密
+- **jsonwebtoken**: JWT认证
+
+### 其他工具
+
 - **Multer**: 文件上传处理
 - **CORS**: 跨域处理
 - **dotenv**: 环境变量管理
@@ -33,23 +54,34 @@ pnpm install
 
 ### 2. 配置环境变量
 
-复制 `env.example` 文件为 `.env` 并修改数据库配置：
+复制 `env.example` 文件为 `.env` 并修改配置：
 
 ```bash
 cp env.example .env
 ```
 
-编辑 `.env` 文件，设置您的MySQL数据库连接信息：
+编辑 `.env` 文件，设置您的配置信息：
 
 ```env
+# 应用配置
+NODE_ENV=development
 PORT=3000
+
+# 数据库配置
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=your_password
+DB_PASSWORD=your_password_here
 DB_NAME=node_service_db
+
+# 安全配置
+JWT_SECRET=your_jwt_secret_here
+BCRYPT_ROUNDS=12
+
+# 文件上传配置
 UPLOAD_DIR=uploads
 MAX_FILE_SIZE=10485760
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,application/pdf,text/plain
 ```
 
 ### 3. 创建数据库
@@ -79,11 +111,36 @@ pnpm run build
 pnpm start
 ```
 
-### 6. 测试API
+### 6. 运行测试
 
 ```bash
-# 确保服务器运行后执行
-pnpm run test:api
+# 运行所有测试
+pnpm test
+
+# 运行测试并生成覆盖率报告
+pnpm run test:coverage
+
+# 监听模式运行测试
+pnpm run test:watch
+```
+
+### 7. 代码质量检查
+
+```bash
+# 运行 ESLint 检查
+pnpm run lint
+
+# 自动修复 ESLint 问题
+pnpm run lint:fix
+
+# 检查代码格式
+pnpm run format:check
+
+# 自动格式化代码
+pnpm run format
+
+# TypeScript 类型检查
+pnpm run type-check
 ```
 
 ## API 接口
@@ -151,38 +208,58 @@ pnpm run test:api
 node-service/
 ├── src/
 │   ├── config/          # 配置文件
-│   │   └── database.ts # 数据库配置
-│   ├── controllers/     # 控制器
-│   │   ├── timeController.ts    # 时间相关控制器
-│   │   ├── fileController.ts     # 文件管理控制器
-│   │   ├── uploadController.ts   # 文件上传控制器
-│   │   ├── userController.ts     # 用户管理控制器
-│   │   └── productController.ts  # 产品管理控制器
+│   │   └── database.ts  # 数据库配置
+│   ├── controllers/     # 控制器层
+│   │   ├── timeController.ts
+│   │   ├── fileController.ts
+│   │   ├── uploadController.ts
+│   │   ├── userController.ts
+│   │   └── productController.ts
 │   ├── middleware/      # 中间件
-│   │   └── index.ts    # 错误处理、日志等中间件
-│   ├── routes/         # 路由
+│   │   ├── index.ts     # 基础中间件
+│   │   └── security.ts  # 安全中间件
+│   ├── models/          # 数据模型层
+│   │   └── index.ts     # 数据库模型
+│   ├── routes/          # 路由
 │   │   ├── timeRoutes.ts
 │   │   ├── fileRoutes.ts
 │   │   ├── uploadRoutes.ts
 │   │   ├── userRoutes.ts
 │   │   └── productRoutes.ts
-│   ├── types/          # 类型定义
-│   │   └── index.ts    # API响应类型、数据库模型类型
-│   ├── utils/          # 工具函数
-│   └── index.ts        # 应用入口文件
-├── scripts/            # 脚本文件
-│   ├── create-database.ts  # 创建数据库脚本
-│   ├── seed-database.ts    # 插入示例数据脚本
-│   ├── test-api.ts         # API测试脚本
-│   └── database.sql        # SQL脚本
-├── uploads/            # 上传文件目录
-├── dist/               # 编译输出目录
-├── package.json        # 项目配置
-├── tsconfig.json       # TypeScript配置
-├── .gitignore         # Git忽略文件
-├── env.example        # 环境变量示例
-├── API.md            # API详细文档
-└── README.md         # 项目说明
+│   ├── services/        # 服务层
+│   │   └── index.ts     # 业务逻辑服务
+│   ├── types/           # 类型定义
+│   │   └── index.ts     # TypeScript类型定义
+│   ├── utils/           # 工具函数
+│   │   ├── logger.ts    # 日志工具
+│   │   └── validation.ts # 验证工具
+│   └── index.ts         # 应用入口文件
+├── tests/               # 测试文件
+│   └── api.test.ts      # API测试
+├── scripts/             # 脚本文件
+│   ├── create-database.ts
+│   ├── seed-database.ts
+│   ├── test-api.ts
+│   └── database.sql
+├── docs/                # 文档目录
+│   └── DEVELOPMENT.md   # 开发指南
+├── uploads/             # 上传文件目录
+├── logs/                # 日志文件目录
+├── .vscode/             # VSCode配置
+│   ├── launch.json      # 调试配置
+│   └── settings.json    # 编辑器设置
+├── .husky/              # Git hooks
+│   └── pre-commit       # 提交前检查
+├── dist/                # 编译输出目录
+├── coverage/            # 测试覆盖率报告
+├── package.json         # 项目配置
+├── tsconfig.json        # TypeScript配置
+├── .eslintrc.js         # ESLint配置
+├── .prettierrc          # Prettier配置
+├── .gitignore           # Git忽略文件
+├── env.example          # 环境变量示例
+├── API.md               # API详细文档
+└── README.md            # 项目说明
 ```
 
 ## 使用示例
@@ -223,6 +300,23 @@ pnpm run dev
 
 使用 `tsx watch` 模式，文件修改后自动重启服务。
 
+### 调试
+
+使用 VSCode 调试功能：
+
+1. 按 F5 启动调试
+2. 设置断点进行调试
+3. 查看变量和调用栈
+
+### 代码质量
+
+项目集成了完整的代码质量工具：
+
+- **ESLint**: 代码检查，确保代码质量
+- **Prettier**: 代码格式化，保持代码风格一致
+- **Husky**: Git hooks，提交前自动检查
+- **Jest**: 单元测试，确保功能正确性
+
 ### 生产部署
 
 ```bash
@@ -242,13 +336,27 @@ pnpm run db:create
 pnpm run db:seed
 ```
 
+## 安全特性
+
+- ✅ **输入验证**: 使用 Joi 进行严格的数据验证
+- ✅ **SQL注入防护**: 使用参数化查询
+- ✅ **文件上传安全**: 限制文件类型和大小
+- ✅ **安全头**: 使用 Helmet 设置安全头
+- ✅ **限流保护**: 防止API滥用
+- ✅ **CORS配置**: 安全的跨域配置
+- ✅ **日志记录**: 完整的操作日志
+
 ## 注意事项
 
-1. **环境变量**: 请确保正确配置 `.env` 文件中的数据库连接信息
+1. **环境变量**: 请确保正确配置 `.env` 文件中的所有必要配置
 2. **MySQL服务**: 确保MySQL服务正在运行
 3. **文件上传**: 上传的文件会保存在 `uploads/` 目录中
 4. **端口冲突**: 默认端口3000，可在 `.env` 文件中修改
-5. **跨域**: 已配置CORS，支持跨域请求
+5. **安全配置**: 生产环境请修改默认的JWT密钥和密码
+6. **日志文件**: 日志文件保存在 `logs/` 目录中
+7. **测试覆盖**: 建议保持测试覆盖率 > 80%
+
+详细的开发指南请参考 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 
 ## 许可证
 

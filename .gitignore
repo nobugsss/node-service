@@ -102,3 +102,6 @@ selenium-debug.log
 *.njsproj
 *.sln
 *.local
+
+# Husky
+.husky/_

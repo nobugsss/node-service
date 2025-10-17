@@ -1,22 +1,25 @@
-/*
- * @Author: boykaaa
- * @Date: 2025-10-17 10:33:58
- * @LastEditors: boykaaa
- * @LastEditTime: 2025-10-17 10:34:05
- * @description:
- * @param:
- * @return:
- */
-import { Router } from "express";
-import { getUsers, getUserById, createUser, updateUser, deleteUser } from "../controllers/userController";
+import { Router } from 'express';
+import {
+	getUsers,
+	getUserById,
+	createUser,
+	updateUser,
+	deleteUser,
+} from '../controllers/userController';
+import {
+	validate,
+	validateQuery,
+	userValidation,
+	paginationValidation,
+} from '../utils/validation';
 
 const router: Router = Router();
 
 // 用户路由
-router.get("/users", getUsers);
-router.get("/users/:id", getUserById);
-router.post("/users", createUser);
-router.put("/users/:id", updateUser);
-router.delete("/users/:id", deleteUser);
+router.get('/users', validateQuery(paginationValidation), getUsers);
+router.get('/users/:id', getUserById);
+router.post('/users', validate(userValidation.create), createUser);
+router.put('/users/:id', validate(userValidation.update), updateUser);
+router.delete('/users/:id', deleteUser);
 
 export default router;
