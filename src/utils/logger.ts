@@ -38,8 +38,35 @@ if (process.env.NODE_ENV !== 'production') {
 	logger.add(
 		new winston.transports.Console({
 			format: winston.format.combine(
+				winston.format.timestamp({ format: 'HH:mm:ss' }),
 				winston.format.colorize(),
-				winston.format.simple()
+				winston.format.printf(({ timestamp, level, message, ...meta }) => {
+					// 格式化HTTP请求日志
+					if (message === 'HTTP Request' && meta.method) {
+						const { method, url, statusCode, duration, ip } = meta as {
+							method: string;
+							url: string;
+							statusCode: number;
+							duration: string;
+							ip: string;
+						};
+						const statusEmoji =
+							statusCode >= 500
+								? '❌'
+								: statusCode >= 400
+									? '⚠️'
+									: statusCode >= 300
+										? '🔄'
+										: '✅';
+						return `${timestamp} ${level} ${statusEmoji} ${method} ${url} - ${statusCode} - ${duration} - IP: ${ip}`;
+					}
+
+					// 格式化其他日志
+					const metaStr = Object.keys(meta).length
+						? JSON.stringify(meta, null, 2)
+						: '';
+					return `${timestamp} ${level} ${message} ${metaStr}`;
+				})
 			),
 		})
 	);

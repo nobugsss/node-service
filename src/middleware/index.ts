@@ -7,35 +7,44 @@
  * @param:
  * @return:
  */
-import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "../types";
+import { Request, Response, NextFunction } from 'express';
+import { ApiResponse } from '../types';
 
 // 错误处理中间件
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-	console.error("Error:", err);
+export const errorHandler = (
+	err: Error,
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	console.error('Error:', err);
 
 	const response: ApiResponse = {
 		success: false,
-		message: "服务器内部错误",
-		error: process.env.NODE_ENV === "development" ? err.message : undefined
+		message: '服务器内部错误',
+		error: process.env.NODE_ENV === 'development' ? err.message : undefined,
 	};
 
 	res.status(500).json(response);
 };
 
 // 404处理中间件
-export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
+export const notFoundHandler = (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
 	const response: ApiResponse = {
 		success: false,
-		message: `路由 ${req.originalUrl} 不存在`
+		message: `路由 ${req.originalUrl} 不存在`,
 	};
 
 	res.status(404).json(response);
 };
 
-// 请求日志中间件
-export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
-	const timestamp = new Date().toISOString();
-	console.log(`[${timestamp}] ${req.method} ${req.originalUrl}`);
-	next();
-};
+// 导入请求日志中间件
+export {
+	requestLogger,
+	slowRequestLogger,
+	errorRequestLogger,
+} from './requestLogger';

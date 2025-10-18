@@ -386,7 +386,7 @@ pnpm run db:seed
 - ✅ **安全头**: 使用 Helmet 设置安全头
 - ✅ **限流保护**: 防止API滥用
 - ✅ **CORS配置**: 安全的跨域配置
-- ✅ **日志记录**: 完整的操作日志
+- ✅ **日志记录**: 完整的操作日志，包含请求详情、状态码、耗时等
 
 ## 注意事项
 
@@ -404,6 +404,10 @@ pnpm run db:seed
    - VSCode调试配置已预配置，开箱即用
    - 推荐使用 "调试API请求" 配置进行API调试
    - 测试调试使用 "调试当前测试文件" 配置
+9. **CORS跨域配置**:
+   - **开发环境**: 自动允许所有源，无需配置
+   - **生产环境**: 在 `.env` 文件中设置 `CORS_ORIGIN` 指定允许的源
+   - **配置示例**: `CORS_ORIGIN=http://localhost:3000,https://yourdomain.com`
 
 ## 快速调试指南
 
@@ -422,6 +426,153 @@ pnpm run db:seed
 - **Jest调试失败**: 使用 "调试测试文件 (使用npx)" 配置
 
 详细的开发指南请参考 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
+
+## CORS跨域配置
+
+### 🚀 快速解决跨域问题
+
+**✅ 开发环境**: 已自动配置允许所有源，无需额外设置！
+
+**🔧 生产环境**: 需要在 `.env` 文件中配置允许的源
+
+### 配置方法
+
+#### 1. 开发环境（推荐）
+
+```bash
+# .env 文件中设置为空或注释掉
+CORS_ORIGIN=
+# 或者
+# CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+```
+
+#### 2. 生产环境
+
+```bash
+# .env 文件中设置具体的允许源
+CORS_ORIGIN=https://yourdomain.com,https://app.yourdomain.com
+```
+
+### 支持的请求类型
+
+- ✅ **GET**: 获取数据
+- ✅ **POST**: 创建数据
+- ✅ **PUT**: 更新数据
+- ✅ **DELETE**: 删除数据
+- ✅ **PATCH**: 部分更新
+- ✅ **OPTIONS**: 预检请求
+
+### 支持的请求头
+
+- ✅ **Content-Type**: 内容类型
+- ✅ **Authorization**: 认证令牌
+- ✅ **X-Requested-With**: 请求标识
+- ✅ **Accept**: 接受类型
+
+### 常见问题解决
+
+#### ❌ 问题: "不允许的CORS源" 错误
+
+**原因**: 请求的源不在允许列表中
+**解决**:
+
+1. 开发环境：确保 `NODE_ENV=development`
+2. 生产环境：在 `CORS_ORIGIN` 中添加你的域名
+
+#### ❌ 问题: 预检请求失败
+
+**原因**: OPTIONS请求被阻止
+**解决**: 确保服务器支持OPTIONS方法（已默认支持）
+
+#### ❌ 问题: 认证请求失败
+
+**原因**: 没有设置 `credentials: true`
+**解决**: 已默认启用，无需额外配置
+
+### 测试CORS配置
+
+```bash
+# 使用curl测试CORS
+curl -H "Origin: http://localhost:3000" \
+     -H "Access-Control-Request-Method: GET" \
+     -H "Access-Control-Request-Headers: X-Requested-With" \
+     -X OPTIONS \
+     http://localhost:3000/api/time/time
+```
+
+## 日志功能
+
+### 📊 请求日志详情
+
+项目集成了完整的请求日志系统，记录每个API请求的详细信息：
+
+#### ✅ 记录的信息
+
+- **请求信息**: 方法、URL、路径、查询参数
+- **客户端信息**: IP地址、User-Agent、Referer
+- **请求体信息**: Content-Type、Content-Length
+- **响应信息**: 状态码、响应时间、响应大小、响应类型
+- **性能指标**: 请求耗时（毫秒）
+
+#### 🎯 日志级别
+
+- **✅ 成功请求** (2xx): `info` 级别
+- **🔄 重定向** (3xx): `info` 级别
+- **⚠️ 客户端错误** (4xx): `warn` 级别
+- **❌ 服务器错误** (5xx): `error` 级别
+
+#### 📁 日志文件位置
+
+- **详细日志**: `logs/combined.log` - 所有请求的完整信息
+- **错误日志**: `logs/error.log` - 仅记录错误和警告
+- **控制台输出**: 开发环境实时显示简化版日志
+
+#### 🔍 日志示例
+
+**成功请求**:
+
+```json
+{
+	"level": "info",
+	"message": "HTTP Request",
+	"method": "GET",
+	"url": "/api/time/time",
+	"statusCode": 200,
+	"duration": "155ms",
+	"ip": "::1",
+	"userAgent": "curl/8.7.1",
+	"timestamp": "2025-10-18 13:36:15"
+}
+```
+
+**错误请求**:
+
+```json
+{
+	"level": "error",
+	"message": "Error Response",
+	"method": "GET",
+	"url": "/api/nonexistent",
+	"statusCode": 404,
+	"duration": "2ms",
+	"ip": "::1",
+	"response": "{\"success\":false,\"message\":\"路由 /api/nonexistent 不存在\"}"
+}
+```
+
+#### ⚡ 性能监控
+
+- **慢请求警告**: 超过1秒的请求会自动记录警告
+- **错误详情记录**: 4xx和5xx错误会记录完整的请求和响应信息
+- **实时监控**: 控制台实时显示请求状态和耗时
+
+#### 🛠️ 配置选项
+
+```bash
+# .env 文件中的日志配置
+LOG_LEVEL=info          # 日志级别: error, warn, info, debug
+LOG_FILE=combined.log   # 日志文件名
+```
 
 ## 许可证
 

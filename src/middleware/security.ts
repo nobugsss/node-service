@@ -78,10 +78,10 @@ export const upload = multer({
 });
 
 // 单文件上传中间件
-export const uploadSingle = upload.single('file');
+export const uploadSingle = upload.single('file') as any;
 
 // 多文件上传中间件
-export const uploadMultiple = upload.array('files', 10);
+export const uploadMultiple = upload.array('files', 10) as any;
 
 // 文件上传错误处理中间件
 export const handleUploadError = (
@@ -131,21 +131,35 @@ export const corsOptions = {
 		origin: string | undefined,
 		callback: (err: Error | null, allow?: boolean) => void
 	) => {
+		// 开发环境允许所有源
+		if (process.env.NODE_ENV === 'development') {
+			return callback(null, true);
+		}
+
+		// 生产环境使用配置的源
 		const allowedOrigins = (
 			process.env.CORS_ORIGIN || 'http://localhost:3000'
 		).split(',');
 
-		// 允许没有origin的请求（如移动应用）
+		// 允许没有origin的请求（如移动应用、Postman等）
 		if (!origin) return callback(null, true);
 
 		if (allowedOrigins.indexOf(origin) !== -1) {
 			callback(null, true);
 		} else {
+			console.warn(`CORS警告: 不允许的源 ${origin}`);
 			callback(new Error('不允许的CORS源'));
 		}
 	},
 	credentials: true,
 	optionsSuccessStatus: 200,
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+	allowedHeaders: [
+		'Content-Type',
+		'Authorization',
+		'X-Requested-With',
+		'Accept',
+	],
 };
 
 // 请求大小限制中间件

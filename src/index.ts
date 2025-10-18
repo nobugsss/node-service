@@ -1,7 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { requestLogger, errorHandler, notFoundHandler } from './middleware';
+import {
+	requestLogger,
+	errorHandler,
+	notFoundHandler,
+	slowRequestLogger,
+	errorRequestLogger,
+} from './middleware';
 import {
 	securityHeaders,
 	rateLimiter,
@@ -37,6 +43,8 @@ app.use(requestSizeLimit);
 
 // 请求日志中间件
 app.use(requestLogger);
+app.use(slowRequestLogger(1000)); // 超过1秒的请求会记录警告
+app.use(errorRequestLogger); // 记录错误请求详情
 
 // 静态文件服务
 app.use('/uploads', express.static('uploads'));
